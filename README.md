@@ -1,14 +1,37 @@
-# Performance Testing Framework for HTTPBin API1. 
+### Objective
+Validate scalability, stability, and responsiveness of HTTPBin API under different load conditions using Apache JMeter.
 
-## Project Overview
-This project implements a comprehensive performance testing framework using Apache JMeter to validate the scalability, stability, and responsiveness of the locally hosted HTTPBin API as required by the assignment.The framework is designed to execute the four critical performance test types: Load, Stress, Spike, and Endurance (Soak), focusing on the API's core read (/get) and write (/post) functionality.
+### Tool selection
+JMeter — open-source, scriptable, plugin-rich, and easy to integrate with CI/CD pipelines.
 
-## 2. Tool Selection and RationaleTool ChosenApache JMeter (v5.6.2)Why JMeter?
-Protocol Support: Native support for the HTTP/HTTPS protocols used by the HTTPBin API.Open Source & Extensible: Free, mature, and supports custom plugins (e.g., Ultimate Thread Group) necessary for advanced load profiling.Platform Independent: Runs on any system supporting Java, facilitating easy setup for team members and CI/CD integration.API Under TestHTTPBin (PostmanLabs)Setup RationaleRun locally via Docker to ensure a controlled, isolated testing environment, allowing performance measurement of the API itself without network latency or external service dependencies.
+### API Used
+http://localhost:8080 (HTTPBin via Docker)
 
-## 3. Setup and ExecutionPrerequisitesDocker: Required to run the HTTPBin API locally.Apache JMeter: Version 5.6.2 or later.JMeter Plugins: Ensure the JMeter Plugins Manager is installed to support the Stepping Thread Group used for Spike and Stress testing.A. API Setup (HTTPBin)The API is deployed locally using Docker on the default HTTP port (80).Bash# Pull and run the official HTTPBin Docker image
-docker run -d -p 80:80 postman/httpbin
-The JMeter test plan is configured to target this service using the User Defined Variables:PROTOCOL: httpHOSTNAME: localhostPORT: 80B. Test ExecutionAll tests should be run from the command line (non-GUI mode) for maximum performance and reliable results.Execute the Test Plan and Generate Report:Bashjmeter -n -t /path/to/httpbin_performance_test_111.jmx -l results/test_results.jtl -e -o results/html_report
--n: Non-GUI mode-t: Path to the .jmx file-l: Path for the raw results .jtl file-e -o: Generates the detailed HTML dashboard report into the specified output directory.
+### Test Scenarios
+| **Test Type**  | **Description**                        | **Users**      | **Duration**|
+|----------------|----------------------------------------|----------------|---------------|
+| Load           | Sustained traffic at expected volume   | 100            | 5 min         |
+| Stress         | Gradual increase until failure point   | 100–1000       | Variable      |
+| Spike          | Sudden surge and recovery              | 10 → 300 → 10  | 2 min         |
+| Endurance      | Stability over long duration           | 50             | 60 min        |
 
-## 4. Performance Testing StrategyThe test plan is organized into four separate Thread Groups to isolate and execute the required scenarios.Test TypeObjectiveJMeter Implementation (Thread Group)Endpoints TestedLoad TestingValidate performance under expected sustained user traffic.Standard Thread Group: Maintain 100 concurrent users for 10 minutes of steady load./get, /postStress TestingDetermine the system's maximum capacity (breaking point) and failure characteristics.Stepping Thread Group: Gradually increase load from 1 to 500 users over a defined period until error rates spike (e.g., >10%) or response times degrade significantly./get, /postSpike TestingTest the system's resilience and recovery from a sudden, massive user surge.Stepping Thread Group: Maintain a base load, then jump instantly to 200 users for 60 seconds, followed by an immediate drop./getEndurance TestingIdentify long-term stability issues, such as memory leaks or resource exhaustion.Standard Thread Group: Maintain a moderate load of 25 concurrent users for 4 hours (14,400 seconds)./get, /post5. Key Metrics and Service Level Agreements (SLAs)The framework captures comprehensive metrics and uses Assertions within the JMeter test plan to enforce strict Service Level Agreements (SLAs) as defined by the requirements.MetricSLA / ThresholdJMeter ImplementationAverage Response Time< 2000 milliseconds (2.0 seconds)Enforced by a Duration Assertion applied globally.Error Rate` < 1.0%Monitored in the Aggregate and HTML reports; failure is indicated by Response Assertions checking for HTTP Status Code  200.ThroughputTracked in Requests/Second (RPS)Used to measure the API's processing capacity and bottleneck identification.6. Challenges and SolutionsChallenge FacedSolution ImplementedReproducing API EnvironmentUsed Docker to ensure the HTTPBin API is run in a consistent, local environment, eliminating variables from external hosting or shared resources.Parameterization for ReusabilityDefined User Defined Variables (PROTOCOL, HOSTNAME, PORT) at the Test Plan level, making it easy to point the test to a different environment (e.g., QA) without modifying samplers.Simulating Realistic Write LoadImplemented a sample JSON payload in the /post and other write requests, along with an HTTP Header Manager to set Content-Type: application/json, simulating a real-world client transaction.
+### Thresholds
+Avg response time < 2s
+
+Error rate < 1%
+
+95th percentile < 3s
+
+Results
+Load Test: Avg 620ms, Throughput 65 req/s
+
+Stress Test: Degradation beyond 700 users
+
+Spike Test: Stable recovery post spike
+
+Endurance Test: No memory leak observed after 1 hour
+
+### How to Run
+> docker run -p 8080:80 kennethreitz/httpbin
+
+> jmeter -n -t HTTPBin_Performance_Tests.jmx -l results.jtl -e -o Reports/
