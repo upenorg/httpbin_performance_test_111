@@ -1,0 +1,41 @@
+name: Performance Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      - name: Download JMeter
+        run: |
+          JMETER_VERSION=5.5
+          curl -sSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_VERSION.tgz -o jmeter.tgz
+          tar -xzf jmeter.tgz
+          sudo mv apache-jmeter-$JMETER_VERSION /opt/jmeter
+
+      - name: Start httpbin (container)
+        run: |
+          docker run -d --name httpbin -p 8000:80 postmanlabs/httpbin
+
+      - name: Run JMeter smoke test
+        env:
+          BASE_URL: http://localhost:8000
+        run: |
+          /opt/jmeter/bin/jmeter -n -t jmeter/httpbin_test_plan.jmx -l ./smoke_results.jtl -Jbase_url=${BASE_URL} -Jthreads=10 -Jrampup=5 -Jduration=30
+          /opt/jmeter/bin/jmeter -g ./smoke_results.jtl -o ./smoke_report
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-smoke-report
+          path: smoke_report
