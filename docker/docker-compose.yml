@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  httpbin:
+    image: postmanlabs/httpbin
+    ports:
+      - "8000:80"
