@@ -37,6 +37,68 @@ docker-compose up -d
 curl http://localhost:8000/get
 ```
 
+## Command to the run the test
+```bash
+chmod +x jmeter/run_jmeter.sh
+./jmeter/run_jmeter.sh
+# Open the generated HTML report in reports/<timestamp>/report/index.html
+```
+
+
+### Test scenarios included
+The JMeter test plan (jmeter/httpbin_test_plan.jmx) contains separate Thread Groups (or uses a single Thread Group with Test Fragments) to implement:
+
+**Load Test** — sustained traffic at expected levels (e.g., 50 / 100 / 500 users, configurable). Duration configurable via ${__P(duration,300)}.
+
+**Stress Test** — ramp users up past expected capacity to find breaking point. Use step-up ramp or increase threads to high values.
+
+**Spike Test** — abrupt jump in virtual users (e.g., 10 → 500 instantly) to validate system reaction.
+
+**Endurance Test** — long-duration, moderate load (e.g., 2–6 hours) to detect memory leaks, resource exhaustion.
+
+
+### Critical endpoints covered:
+* GET /get
+* POST /post
+* PUT /put
+* DELETE /delete
+
+Each sampler includes response assertions (HTTP 200/201, JSON content checks) and JMeter response time assertions (e.g., 95% of requests < 2000 ms) as well as listeners for throughput, response times, and error counts.
+
+
+### Metrics captured & thresholds (SLA)
+#### Captured metrics:
+
+* Response time: min, max, mean, 90th/95th percentiles
+
+* Throughput: requests/sec
+
+* Error rate: % failed requests
+
+* JMeter aggregate metrics: median, standard deviation
+
+* System resource metrics (optional): CPU, memory, network — via docker stats
+
+#### Example SLA thresholds:
+* Avg response time < 2000 ms
+
+* 95th percentile < 3000 ms
+
+* Error rate < 1%
+
+* Throughput (target): depends on scenario; measure baseline
+
+If SLA/threshold assertions fail the test, the JMeter plan will mark assertions as failed and the JTL will indicate failures.
+
+
+### Reporting
+We use JMeter's built-in HTML report generation (via -e -o <output>). The HTML report contains:
+* Dashboard graphs (response times over time, percentiles, throughput)
+* Error table, request summary
+* Request slowest samples
+
+For long-term or CI-driven reporting, you can push results into a time-series store (InfluxDB) and visualize via Grafana (optional, advanced).
+
 
 ### Test Scenarios
 | **Test Type**  | **Description**                        | **Users**      | **Duration**|
