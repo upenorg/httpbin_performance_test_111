@@ -1,11 +1,42 @@
-### Objective
-Validate scalability, stability, and responsiveness of HTTPBin API under different load conditions using Apache JMeter.
+# HTTPBin Performance Test — Complete Solution
 
-### Tool selection
-JMeter — open-source, scriptable, plugin-rich, and easy to integrate with CI/CD pipelines.
+This repo contains a performance testing framework for the HTTPBin API (local Docker instance), including JMeter test plans, scripts for running Load/Stress/Spike/Soak scenarios, reporting, and a GitHub Actions pipeline for running smoke performance tests on every push.
 
-### API Used
-http://localhost:8080 (HTTPBin via Docker)
+## Contents
+- `jmeter/`
+  - `httpbin_test_plan.jmx` — main JMeter test plan with parameterization and assertions
+  - `users.csv` — (optional) user data or variable CSV for parameterization
+  - `env.properties` — environment-specific values (base URL, thread counts, durations)
+  - `run_jmeter.sh` — helper script to run JMeter in non-GUI mode and generate HTML report
+- `.github/workflows/`
+  - `performance-smoke.yml` — GitHub Actions pipeline to run a smoke performance test and upload report
+- `docker/`
+  - `docker-compose.yml` — starts httpbin locally via official image for testing
+- `reports/` — generated JMeter HTML reports (gitignored)
+- `README.md` — this file
+
+---
+
+## Quick start (local)
+
+### Prerequisites
+- Java 8+ (for JMeter)
+- Apache JMeter (recommended 5.5+)
+- Docker & docker-compose
+- Git
+- (Optional) curl, unzip
+
+### 1) Start the HTTPBin API locally
+We use the official httpbin Docker image.
+
+```bash
+# from repo root
+cd docker
+docker-compose up -d
+# confirm it's up:
+curl http://localhost:8000/get
+```
+
 
 ### Test Scenarios
 | **Test Type**  | **Description**                        | **Users**      | **Duration**|
