@@ -97,34 +97,31 @@ We use JMeter's built-in HTML report generation (via -e -o <output>). The HTML r
 * Error table, request summary
 * Request slowest samples
 
-For long-term or CI-driven reporting, you can push results into a time-series store (InfluxDB) and visualize via Grafana (optional, advanced).
+
+### What CICD github workflow does
+1. Installs Java and JMeter.
+2. Runs httpbin Docker container.
+3. Runs a small smoke test (10 users, 30 seconds).
+4. Generates an HTML report and uploads it as an artifact.
+
+For long-term or CI-driven reporting, we can push results into a time-series store (InfluxDB) and visualize via Grafana (optional, advanced).
+
+### How to parameterize & reuse the framework
+* Use ${__P(myprop,default)} in JMeter to accept properties from CLI (-J).
+* Store environment-specific configs in jmeter/env.properties (QA/Stage/Prod).
+* Use CSV Data Set Config for payload variation (users.csv).
+
+### CI tips and failure gating
+In CI, run a small smoke test on each PR to catch regressions.
+
+For gating: fail the job if global error percentage > 1% or if 95th percentile > configured SLA.
+
+Achieve this by adding an additional step to parse results.jtl (e.g., using jtl-utils or a simple Python script) and exit 1 if thresholds exceeded.
 
 
-### Test Scenarios
-| **Test Type**  | **Description**                        | **Users**      | **Duration**|
-|----------------|----------------------------------------|----------------|---------------|
-| Load           | Sustained traffic at expected volume   | 100            | 5 min         |
-| Stress         | Gradual increase until failure point   | 100–1000       | Variable      |
-| Spike          | Sudden surge and recovery              | 10 → 300 → 10  | 2 min         |
-| Endurance      | Stability over long duration           | 50             | 60 min        |
+### Improvements & next steps
+* Integrate InfluxDB + Grafana for long-term metric retention and dashboards.
+* Add system resource collection (Prometheus node exporter) when testing real services.
+* Add artifacts for test CSVs and sample payloads in testdata/.
+* Add more complex JMeter test fragments for chained flows (login → purchase → fetch).
 
-### Thresholds
-Avg response time < 2s
-
-Error rate < 1%
-
-95th percentile < 3s
-
-Results
-Load Test: Avg 620ms, Throughput 65 req/s
-
-Stress Test: Degradation beyond 700 users
-
-Spike Test: Stable recovery post spike
-
-Endurance Test: No memory leak observed after 1 hour
-
-### How to Run
-> docker run -p 8080:80 kennethreitz/httpbin
-
-> jmeter -n -t HTTPBin_Performance_Tests.jmx -l results.jtl -e -o Reports/
