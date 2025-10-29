@@ -98,11 +98,36 @@ We use JMeter's built-in HTML report generation (via -e -o <output>). The HTML r
 * Request slowest samples
 
 -----------------
+### Load Test
+Goal: Validate performance under expected daily load.
+
+Objective: Check stability, throughput, response time SLAs.
+
+Assertions / SLAs:
+* Response time (avg) < 1s
+
+![Load Test Configuration](images/Load_Test_Configuration.png)
+
+-----------------
+### Stress Test
+Goal: Identify system breaking point.
+
+Objective: Push system gradually beyond normal capacity.
+
+Assertions / SLAs:
+* Response time (avg) < 1s
+
+![Stress Test Configuration](images/Stress_Test_Configuration.png)
+
+-----------------
 
 ### Spike Test
 Goal: Test system resilience to sudden traffic bursts.
 
 Objective: Ensure app recovers after an instantaneous surge.
+
+Assertions / SLAs:
+* Response time (avg) < 1s
 
 #### Expected Behavior:
 
@@ -110,6 +135,17 @@ Objective: Ensure app recovers after an instantaneous surge.
 * No persistent errors after spike ends.
 
 ![Spike Test Configuration](images/Spike_Test_Configuration.png)
+
+-----------------
+### Endurance Test
+Goal: Detect memory leaks, stability, or resource exhaustion over time.
+
+Objective: Run long and steady under nominal load. Look out for OOM. 
+
+Assertions / SLAs:
+* Response time (avg) < 1s
+
+![Endurance Test Configuration](images/Endurance_Test_Configuration.png)
 
 
 ### What CICD github workflow does
