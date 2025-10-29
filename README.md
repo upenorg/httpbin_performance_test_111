@@ -98,6 +98,18 @@ We use JMeter's built-in HTML report generation (via -e -o <output>). The HTML r
 * Request slowest samples
 
 
+### Spike Test
+Goal: Test system resilience to sudden traffic bursts.
+
+Objective: Ensure app recovers after an instantaneous surge.
+
+#### Expected Behavior:
+
+* Initial response latency spike, then recovery.
+* No persistent errors after spike ends.
+
+
+
 ### What CICD github workflow does
 1. Installs Java and JMeter.
 2. Runs httpbin Docker container.
@@ -124,4 +136,5 @@ Achieve this by adding an additional step to parse results.jtl (e.g., using jtl-
 * Add system resource collection (Prometheus node exporter) when testing real services.
 * Add artifacts for test CSVs and sample payloads in testdata/.
 * Add more complex JMeter test fragments for chained flows (login → purchase → fetch).
+
 
