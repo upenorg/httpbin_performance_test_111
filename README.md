@@ -97,6 +97,7 @@ We use JMeter's built-in HTML report generation (via -e -o <output>). The HTML r
 * Error table, request summary
 * Request slowest samples
 
+-----------------
 
 ### Spike Test
 Goal: Test system resilience to sudden traffic bursts.
