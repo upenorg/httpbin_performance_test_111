@@ -157,6 +157,7 @@ Assertions / SLAs:
 4. Generates an HTML report and uploads it as an artifact.
 
 For long-term or CI-driven reporting, we can push results into a time-series store (InfluxDB) and visualize via Grafana (optional, advanced).
+
 ---
 ### How to parameterize & reuse the framework
 * Use ${__P(myprop,default)} in JMeter to accept properties from CLI (-J).
