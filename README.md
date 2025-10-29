@@ -108,6 +108,7 @@ Objective: Ensure app recovers after an instantaneous surge.
 * Initial response latency spike, then recovery.
 * No persistent errors after spike ends.
 
+![Spike Test Configuration](images/Spike_Test_Configuration.png)
 
 
 ### What CICD github workflow does
